@@ -68,7 +68,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <p>To start with, data is read from the CSV files where it is stored:</p>
 <pre class="r"><code>trainData &lt;- read.csv(&quot;pml-training.csv&quot;, row.names = 1)
 testData &lt;- read.csv(&quot;pml-testing.csv&quot;, row.names = 1) </code></pre>
-<p>After visual inspection of the data, it is observed that it has a lot of NA measurements. Moreover, since there are more than 150 predictors, variance is used as a filter to remove predictors that have nearly zero variance. THis way, computation time is reduced by considering a reduced predictor number.</p>
+<p>After visual inspection of the data, it is observed that it has a lot of NA measurements. Moreover, since there are more than 150 predictors, variance is used as a filter to remove predictors that have nearly zero variance. This way, computation time is reduced by using a lower number of predictors.</p>
 <pre class="r"><code>library(caret)</code></pre>
 <pre><code>## Loading required package: lattice
 ## Loading required package: ggplot2</code></pre>
@@ -87,7 +87,7 @@ trainData &lt;- trainData[, noNaCols]</code></pre>
 </div>
 <div id="training-the-model" class="section level2">
 <h2>Training the model</h2>
-<p>The kind of problem that it is faced here, is a good candidate for a prediction model based on classification. From all of them, Random Forest is generally very accurate, so this is the first option to be considered here. Furthermore, to avoid overfitting, 10-fold cross-validation is used:</p>
+<p>The kind of problem faced here, is a good candidate for a prediction model based on classification. From all of them, Random Forest is generally very accurate, so this is the first option to be explored here. Furthermore, to avoid overfitting, 10-fold cross-validation is used:</p>
 <pre class="r"><code>randomForestFit &lt;- train(classe ~ ., data = trainData, method = &quot;rf&quot;, trControl = trainControl(method = &quot;cv&quot;, number = 10))</code></pre>
 <pre><code>## Loading required package: randomForest
 ## randomForest 4.6-10
@@ -130,7 +130,11 @@ trainData &lt;- trainData[, noNaCols]</code></pre>
 ## C    0    3 3419    0    0   0.0008767
 ## D    0    0    1 3214    1   0.0006219
 ## E    0    0    0    0 3607   0.0000000</code></pre>
-<p>As it is reported by the model, its 1 accuracy is very googd, and its 0,04% out-of-sample error is very low. With this results, the resulting model can be confidently used to predict the exercise type in the test data.</p>
+<ul>
+<li>Model accuracy: 1</li>
+<li>Out-of-sample error: 0.04%</li>
+</ul>
+<p>As it is reported by the model, its 1 accuracy is very good, and its 0,04% out-of-sample error is very low. With these results, the resulting model can be confidently used to predict the exercise type from the test data.</p>
 </div>
 <div id="predicting-on-the-test-data" class="section level2">
 <h2>Predicting on the test data</h2>
@@ -139,7 +143,7 @@ trainData &lt;- trainData[, noNaCols]</code></pre>
 predictedClasses</code></pre>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
 ## Levels: A B C D E</code></pre>
-<p>For assignment submission, the prediction output is converted into a characters’ array, and the required files are generated:</p>
+<p>Finally, and for assignment submission, the prediction output is converted into a characters’ array, and the required files are generated:</p>
 <pre class="r"><code>answers &lt;- as.character(predictedClasses)
 
 n = length(answers)

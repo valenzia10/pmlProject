@@ -18,7 +18,7 @@ trainData <- read.csv("pml-training.csv", row.names = 1)
 testData <- read.csv("pml-testing.csv", row.names = 1) 
 ```
 
-After visual inspection of the data, it is observed that it has a lot of NA measurements. Moreover, since there are more than 150 predictors, variance is used as a filter to remove predictors that have nearly zero variance. THis way, computation time is reduced by considering a reduced predictor number.
+After visual inspection of the data, it is observed that it has a lot of NA measurements. Moreover, since there are more than 150 predictors, variance is used as a filter to remove predictors that have nearly zero variance. This way, computation time is reduced by using a lower number of predictors.
 
 ```{r echo=TRUE,cache=TRUE}
 library(caret)
@@ -40,7 +40,7 @@ Now that the number of predictors have been reduced, modelling can begin.
 
 Training the model
 ------------------
-The kind of problem that it is faced here, is a good candidate for a prediction model based on classification. From all of them, Random Forest is generally very accurate, so this is the first option to be considered here. Furthermore, to avoid overfitting, 10-fold cross-validation is used:
+The kind of problem faced here, is a good candidate for a prediction model based on classification. From all of them, Random Forest is generally very accurate, so this is the first option to be explored here. Furthermore, to avoid overfitting, 10-fold cross-validation is used:
 
 ```{r echo=TRUE,cache=TRUE}
 randomForestFit <- train(classe ~ ., data = trainData, method = "rf", trControl = trainControl(method = "cv", number = 10))
@@ -50,7 +50,11 @@ The training process results in the following final model:
 randomForestFit
 randomForestFit$finalModel
 ```
- As it is reported by the model, its 1 accuracy is very googd, and its 0,04% out-of-sample error is very low. With this results, the resulting model can be confidently used to predict the exercise type in the test data.
+
+- Model accuracy: 1
+- Out-of-sample error: 0.04%
+
+As it is reported by the model, its 1 accuracy is very good, and its 0,04% out-of-sample error is very low. With these results, the resulting model can be confidently used to predict the exercise type from the test data.
  
 Predicting on the test data
 ---------------------------
@@ -61,7 +65,7 @@ predictedClasses <- predict(randomForestFit,testData)
 predictedClasses
 ```
 
-For assignment submission, the prediction output is converted into a characters' array, and the required files are generated:
+Finally, and for assignment submission, the prediction output is converted into a characters' array, and the required files are generated:
 
 ```{r echo=TRUE}
 answers <- as.character(predictedClasses)
