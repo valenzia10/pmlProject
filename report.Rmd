@@ -1,0 +1,74 @@
+---
+title: "Practical Machine Learning Project"
+author: "Enric Valencia"
+date: "October 19, 2014"
+output: html_document
+---
+
+Summary
+-------
+The purpose of this project is to apply Practical Machine Learning to the data provided by fitness monitors in order to predict the type of exercise that the individuals under measurement are doing at the data record time. To do so, a model is fit to the training dataset, and this model is then applied to the test dataset.
+
+Loading and cleaning data
+-------------------------
+To start with, data is read from the CSV files where it is stored:
+
+```{r echo=TRUE,cache=TRUE}
+trainData <- read.csv("pml-training.csv", row.names = 1)
+testData <- read.csv("pml-testing.csv", row.names = 1) 
+```
+
+After visual inspection of the data, it is observed that it has a lot of NA measurements. Moreover, since there are more than 150 predictors, variance is used as a filter to remove predictors that have nearly zero variance. THis way, computation time is reduced by considering a reduced predictor number.
+
+```{r echo=TRUE,cache=TRUE}
+library(caret)
+
+zeroVars <- nearZeroVar(trainData, saveMetrics = T)
+trainData <- trainData[, !zeroVars$nzv]
+
+noNaCols <- sapply(colnames(trainData),function(x){
+  if(sum(is.na(trainData[,x])) > 0.8* nrow(trainData))
+    return(FALSE)
+  else
+    return(TRUE)
+})
+
+trainData <- trainData[, noNaCols]
+```
+
+Now that the number of predictors have been reduced, modelling can begin.
+
+Training the model
+------------------
+The kind of problem that it is faced here, is a good candidate for a prediction model based on classification. From all of them, Random Forest is generally very accurate, so this is the first option to be considered here. Furthermore, to avoid overfitting, 10-fold cross-validation is used:
+
+```{r echo=TRUE,cache=TRUE}
+randomForestFit <- train(classe ~ ., data = trainData, method = "rf", trControl = trainControl(method = "cv", number = 10))
+```
+The training process results in the following final model:
+```{r echo=TRUE,cache=TRUE}
+randomForestFit
+randomForestFit$finalModel
+```
+ As it is reported by the model, its 1 accuracy is very googd, and its 0,04% out-of-sample error is very low. With this results, the resulting model can be confidently used to predict the exercise type in the test data.
+ 
+Predicting on the test data
+---------------------------
+Now, the obtained Random Forest model is  used for prediction on the test data:
+
+```{r echo=TRUE,cache=TRUE}
+predictedClasses <- predict(randomForestFit,testData)
+predictedClasses
+```
+
+For assignment submission, the prediction output is converted into a characters' array, and the required files are generated:
+
+```{r echo=TRUE}
+answers <- as.character(predictedClasses)
+
+n = length(answers)
+for(i in 1:n){
+  filename = paste0("./subfiles/problem_id_",i,".txt")
+  write.table(answers[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+}
+```
