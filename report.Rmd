@@ -25,18 +25,9 @@ library(caret)
 
 zeroVars <- nearZeroVar(trainData, saveMetrics = T)
 trainData <- trainData[, !zeroVars$nzv]
-
-noNaCols <- sapply(colnames(trainData),function(x){
-  if(sum(is.na(trainData[,x])) > 0.8* nrow(trainData))
-    return(FALSE)
-  else
-    return(TRUE)
-})
-
-trainData <- trainData[, noNaCols]
 ```
 
-Now that the number of predictors have been reduced, modelling can begin.
+Now that the number of predictors has been reduced, modelling can begin.
 
 Training the model
 ------------------
